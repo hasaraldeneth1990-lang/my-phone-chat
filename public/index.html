@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>මගේ අලුත් Chat App එක</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
+        .chat-container { width: 380px; height: 500px; background: white; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .message { padding: 10px 15px; border-radius: 15px; max-width: 75%; word-wrap: break-word; font-size: 14px; }
+        .received { background-color: #e4e6eb; align-self: flex-start; color: black; }
+        .sent { background-color: #0084ff; color: white; align-self: flex-end; }
+        .chat-input { display: flex; padding: 15px; background: #fff; border-top: 1px solid #ddd; }
+        .chat-input input { flex: 1; padding: 10px 15px; border: 1px solid #ddd; border-radius: 20px; outline: none; }
+        .chat-input button { background: #0084ff; color: white; border: none; padding: 10px 20px; margin-left: 8px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-messages" id="messages"></div>
+    <div class="chat-input">
+        <input type="text" id="msgInput" placeholder="මැසේජ් එකක් ලියන්න..." autocomplete="off">
+        <button onclick="sendMsg()">Send</button>
+    </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io(); 
+    const messagesDiv = document.getElementById('messages');
+    const input = document.getElementById('msgInput');
+
+    function sendMsg() {
+        if (input.value.trim() !== "") {
+            socket.emit('chat message', { text: input.value, id: socket.id });
+            input.value = "";
+        }
+    }
+
+    socket.on('chat message', (msg) => {
+        const item = document.createElement('div');
+        item.classList.add('message');
+        if (msg.id === socket.id) {
+            item.classList.add('sent');
+        } else {
+            item.classList.add('received');
+        }
+        item.innerText = msg.text;
+        messagesDiv.appendChild(item);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight; 
+    });
+
+    input.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") { sendMsg(); }
+    });
+</script>
+
+</body>
+</html>
